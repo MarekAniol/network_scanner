@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from scapy.all import *
+from scapy.all import TCP, IP, ICMP , conf, sr, RandShort
 from abc import ABC, abstractmethod
 conf.verb = 0
 
@@ -24,7 +24,7 @@ class IcmpHostScanner(Scanner):
     def scan(self):
         print("[+] Stage: Host discovery")
 
-        pings, unans = sr(IP(src=self.src_IP ,dst=self.target)/ICMP(), timeout=2)
+        pings, _ = sr(IP(src=self.src_IP ,dst=self.target)/ICMP(), timeout=2)
         hosts = []
 
         for ping in pings:
@@ -50,7 +50,7 @@ class TcpServiceScanner(Scanner):
         print("[+] Stage: Service discovery")
         sport = RandShort() if self.sport_TCP is None else self.sport_TCP
         for host in self.hosts:
-            tcp_results, unans = sr(IP(dst=host["ip"])/TCP(sport=sport, dport=self.dports), timeout=1)
+            tcp_results, _ = sr(IP(dst=host["ip"])/TCP(sport=sport, dport=self.dports), timeout=1)
             print(f'Host: {host["ip"]}')
             for tcp_conn in tcp_results:
                 if self.__is_tcp_synack(tcp_conn) == False:
